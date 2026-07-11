@@ -1,5 +1,6 @@
 using BookBase.Interfaces;
 using BookBase.Models;
+using BookBase.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -45,7 +46,7 @@ public sealed partial class LibraryViewModel : BaseViewModel
     [RelayCommand]
     private Task EditAsync(Book book)
     {
-        return Shell.Current.GoToAsync($"{nameof(BookBase.Views.AddEditBookPage)}?bookId={book.Id}");
+        return Shell.Current.GoToAsync($"{nameof(AddEditBookPage)}?bookId={book.Id}");
     }
 
     private async Task RefreshAsync(CancellationToken cancellationToken)

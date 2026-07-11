@@ -26,9 +26,16 @@ public partial class BookDetailsPage : ContentPage
 
     private async Task LoadAsync()
     {
-        if (BindingContext is BookDetailsViewModel vm)
+        try
         {
-            await vm.LoadCommand.ExecuteAsync(_bookId);
+            if (BindingContext is BookDetailsViewModel vm)
+            {
+                await vm.LoadCommand.ExecuteAsync(_bookId);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
         }
     }
 }

@@ -42,6 +42,11 @@ public sealed class ImportExportService : IImportExportService
         foreach (var book in books)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var isbn = book.ISBN13 ?? book.ISBN10;
+            if (!string.IsNullOrWhiteSpace(isbn) && await _bookRepository.GetByIsbnAsync(isbn, cancellationToken) is not null)
+            {
+                continue;
+            }
             book.Id = 0;
             await _bookRepository.SaveAsync(book, cancellationToken);
         }

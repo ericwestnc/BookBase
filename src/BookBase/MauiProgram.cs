@@ -48,14 +48,14 @@ public static class MauiProgram
 
         var app = builder.Build();
 
-        _ = InitializeDatabaseAsync(app.Services);
+        InitializeDatabase(app.Services);
 
         return app;
     }
 
-    private static async Task InitializeDatabaseAsync(IServiceProvider serviceProvider)
+    private static void InitializeDatabase(IServiceProvider serviceProvider)
     {
         var database = serviceProvider.GetRequiredService<SqliteDatabase>();
-        await database.InitializeAsync();
+        database.InitializeAsync().GetAwaiter().GetResult();
     }
 }

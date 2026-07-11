@@ -15,11 +15,7 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         _bookRepository = bookRepository;
         _bookLookupService = bookLookupService;
         Title = "Add / Edit Book";
-        EditableBook = new Book
-        {
-            DateAdded = DateTimeOffset.UtcNow,
-            Status = ReadingStatus.WantToRead
-        };
+        EditableBook = CreateDefaultBook();
     }
 
     [ObservableProperty]
@@ -37,7 +33,36 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         var book = await _bookLookupService.LookupByIsbnAsync(isbn, cancellationToken);
         if (book is not null)
         {
-            EditableBook = book;
+            EditableBook = new Book
+            {
+                Id = EditableBook.Id,
+                ISBN10 = book.ISBN10 ?? EditableBook.ISBN10,
+                ISBN13 = book.ISBN13 ?? EditableBook.ISBN13,
+                Title = string.IsNullOrWhiteSpace(book.Title) ? EditableBook.Title : book.Title,
+                Subtitle = book.Subtitle ?? EditableBook.Subtitle,
+                Description = book.Description ?? EditableBook.Description,
+                Author = book.Author ?? EditableBook.Author,
+                Publisher = book.Publisher ?? EditableBook.Publisher,
+                PublishedDate = book.PublishedDate ?? EditableBook.PublishedDate,
+                PageCount = book.PageCount ?? EditableBook.PageCount,
+                Language = book.Language ?? EditableBook.Language,
+                CoverUrl = book.CoverUrl ?? EditableBook.CoverUrl,
+                CoverImage = EditableBook.CoverImage,
+                Format = EditableBook.Format,
+                Status = EditableBook.Status,
+                Rating = EditableBook.Rating,
+                PersonalNotes = EditableBook.PersonalNotes,
+                CurrentPage = EditableBook.CurrentPage,
+                TotalPages = EditableBook.TotalPages,
+                DateAdded = EditableBook.DateAdded,
+                DateStarted = EditableBook.DateStarted,
+                DateFinished = EditableBook.DateFinished,
+                Favorite = EditableBook.Favorite,
+                Owned = EditableBook.Owned,
+                Wishlist = EditableBook.Wishlist,
+                PricePaid = EditableBook.PricePaid,
+                LocationOnShelf = EditableBook.LocationOnShelf
+            };
         }
     }
 
@@ -53,6 +78,7 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
     {
         if (bookId <= 0)
         {
+            EditableBook = CreateDefaultBook();
             return;
         }
 
@@ -62,4 +88,10 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
             EditableBook = existing;
         }
     }
+
+    private static Book CreateDefaultBook() => new()
+    {
+        DateAdded = DateTimeOffset.UtcNow,
+        Status = ReadingStatus.WantToRead
+    };
 }

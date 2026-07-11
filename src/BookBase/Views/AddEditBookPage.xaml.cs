@@ -26,9 +26,16 @@ public partial class AddEditBookPage : ContentPage
 
     private async Task LoadAsync()
     {
-        if (BindingContext is AddEditBookViewModel vm)
+        try
         {
-            await vm.LoadCommand.ExecuteAsync(_bookId);
+            if (BindingContext is AddEditBookViewModel vm)
+            {
+                await vm.LoadCommand.ExecuteAsync(_bookId);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(ex);
         }
     }
 }
