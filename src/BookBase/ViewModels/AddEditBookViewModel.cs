@@ -47,4 +47,19 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         await _bookRepository.SaveAsync(EditableBook, cancellationToken);
         await Shell.Current.GoToAsync("..");
     }
+
+    [RelayCommand]
+    private async Task LoadAsync(int bookId)
+    {
+        if (bookId <= 0)
+        {
+            return;
+        }
+
+        var existing = await _bookRepository.GetByIdAsync(bookId);
+        if (existing is not null)
+        {
+            EditableBook = existing;
+        }
+    }
 }

@@ -37,10 +37,15 @@ public sealed partial class LibraryViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task ToggleViewAsync()
+    private void ToggleView()
     {
         GridView = !GridView;
-        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private Task EditAsync(Book book)
+    {
+        return Shell.Current.GoToAsync($"{nameof(BookBase.Views.AddEditBookPage)}?bookId={book.Id}");
     }
 
     private async Task RefreshAsync(CancellationToken cancellationToken)

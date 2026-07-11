@@ -49,7 +49,10 @@ public sealed class BookRepository : IBookRepository
 
         var q = query.Trim().ToLowerInvariant();
         return await _database.Connection.Table<Book>()
-            .Where(b => b.Title.ToLower().Contains(q) || (b.Author ?? string.Empty).ToLower().Contains(q) || (b.ISBN13 ?? string.Empty).Contains(q) || (b.ISBN10 ?? string.Empty).Contains(q))
+            .Where(b => b.Title.ToLower().Contains(q)
+                || (b.Author ?? string.Empty).ToLower().Contains(q)
+                || (b.ISBN13 ?? string.Empty).ToLower().Contains(q)
+                || (b.ISBN10 ?? string.Empty).ToLower().Contains(q))
             .ToListAsync();
     }
 

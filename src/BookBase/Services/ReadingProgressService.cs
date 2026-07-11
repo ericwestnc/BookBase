@@ -16,7 +16,7 @@ public sealed class ReadingProgressService : IReadingProgressService
 
     public async Task UpdateProgressAsync(int bookId, int currentPage, CancellationToken cancellationToken = default)
     {
-        var book = await _bookRepository.GetByIdAsync(bookId, cancellationToken) ?? throw new InvalidOperationException("Book not found.");
+        var book = await _bookRepository.GetByIdAsync(bookId, cancellationToken) ?? throw new InvalidOperationException($"Book with ID {bookId} not found.");
         var previousPage = book.CurrentPage;
         book.CurrentPage = Math.Max(0, currentPage);
 

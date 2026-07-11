@@ -9,7 +9,7 @@
             <Label Text="{Binding Book.Title}" FontAttributes="Bold" FontSize="24" />
             <Label Text="{Binding Book.Author}" FontSize="16" />
             <Label Text="{Binding Book.Description}" />
-            <ProgressBar Progress="{Binding Book.CurrentPage}" />
+            <ProgressBar Progress="{Binding Progress}" />
             <Label Text="{Binding Book.PersonalNotes}" />
         </VerticalStackLayout>
     </ScrollView>

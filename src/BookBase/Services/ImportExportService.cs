@@ -47,5 +47,5 @@ public sealed class ImportExportService : IImportExportService
         }
     }
 
-    private static string Escape(string? value) => string.IsNullOrWhiteSpace(value) ? string.Empty : $"\"{value.Replace("\"", "\"\"") }\"";
+    private static string Escape(string? value) => string.IsNullOrWhiteSpace(value) ? string.Empty : $"\"{value.Replace("\"", "\"\"")}\"";
 }

@@ -66,7 +66,7 @@ public sealed class BookLookupService : IBookLookupService
             Title = root.TryGetProperty("title", out var title) ? title.GetString() ?? "Untitled" : "Untitled",
             Subtitle = root.TryGetProperty("subtitle", out var subtitle) ? subtitle.GetString() : null,
             PublishedDate = DateTimeOffset.TryParse(root.TryGetProperty("publish_date", out var publishDate) ? publishDate.GetString() : null, out var dt) ? dt : null,
-            PageCount = root.TryGetProperty("number_of_pages", out var pages) && pages.TryGetInt32(out var value) ? value : null,
+            PageCount = root.TryGetProperty("number_of_pages", out var pages) && pages.TryGetInt32(out var pageCount) ? pageCount : null,
             Status = ReadingStatus.WantToRead,
             DateAdded = DateTimeOffset.UtcNow,
             Owned = false,

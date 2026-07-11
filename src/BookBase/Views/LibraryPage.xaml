@@ -3,12 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:BookBase.Models"
              x:Class="BookBase.Views.LibraryPage"
+             x:Name="LibraryRoot"
              Title="Library">
     <Grid RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="8">
         <SearchBar Grid.Row="0" Placeholder="Search books" Text="{Binding SearchText}" SearchCommand="{Binding SearchCommand}" />
         <Button Grid.Row="1" Text="Toggle Grid/List" Command="{Binding ToggleViewCommand}" />
 
-        <CollectionView Grid.Row="2" ItemsSource="{Binding Books}" IsVisible="{Binding GridView}">
+        <CollectionView Grid.Row="2" ZIndex="1" ItemsSource="{Binding Books}" IsVisible="{Binding GridView}">
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Orientation="Vertical" Span="2" />
             </CollectionView.ItemsLayout>
@@ -24,13 +25,16 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <CollectionView Grid.Row="2" ItemsSource="{Binding Books}" IsVisible="{Binding GridView, Converter={StaticResource BoolInverseConverter}}">
+        <CollectionView Grid.Row="2" ZIndex="0" ItemsSource="{Binding Books}" IsVisible="{Binding GridView, Converter={StaticResource BoolInverseConverter}}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Book">
                     <SwipeView>
                         <SwipeView.RightItems>
                             <SwipeItems>
-                                <SwipeItem Text="Edit" BackgroundColor="LightBlue" />
+                                <SwipeItem Text="Edit"
+                                           BackgroundColor="LightBlue"
+                                           Command="{Binding BindingContext.EditCommand, Source={x:Reference Name=LibraryRoot}}"
+                                           CommandParameter="{Binding .}" />
                             </SwipeItems>
                         </SwipeView.RightItems>
                         <Grid ColumnDefinitions="*,Auto" Padding="10">

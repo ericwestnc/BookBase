@@ -18,9 +18,13 @@ public sealed partial class BookDetailsViewModel : BaseViewModel
     [ObservableProperty]
     private Book? book;
 
+    public double Progress => Book is null || Book.TotalPages <= 0 ? 0 : Math.Clamp((double)Book.CurrentPage / Book.TotalPages, 0, 1);
+
     [RelayCommand]
     private async Task LoadAsync(int bookId)
     {
-        Book = await _bookRepository.GetByIdAsync(bookId);
+        var loadedBook = await _bookRepository.GetByIdAsync(bookId);
+        Book = loadedBook ?? new Book { Title = "Book not found" };
+        OnPropertyChanged(nameof(Progress));
     }
 }
