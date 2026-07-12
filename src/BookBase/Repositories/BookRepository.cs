@@ -79,7 +79,9 @@ public sealed class BookRepository : IBookRepository
         }
 
         var books = await _database.Connection.Table<Book>()
-            .Where(b => b.ISBN10 != null || b.ISBN13 != null)
+            .Where(b =>
+                (b.ISBN10 != null && (b.ISBN10.Contains("-") || b.ISBN10.Contains(" ")))
+                || (b.ISBN13 != null && (b.ISBN13.Contains("-") || b.ISBN13.Contains(" "))))
             .ToListAsync();
 
         return books.FirstOrDefault(b =>
