@@ -21,6 +21,58 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
     [ObservableProperty]
     private Book editableBook;
 
+    /// <summary>
+    /// Called by <see cref="Views.AddEditBookPage"/> when the page receives
+    /// a <c>scannedIsbn</c> Shell query parameter from the scanner page.
+    /// Sets the appropriate ISBN field and triggers an automatic lookup.
+    /// </summary>
+    public async Task ApplyScannedIsbnAsync(string isbn, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(isbn))
+        {
+            return;
+        }
+
+        EditableBook = new Book
+        {
+            Id = EditableBook.Id,
+            ISBN10 = isbn.Length == 10 ? isbn : EditableBook.ISBN10,
+            ISBN13 = isbn.Length == 13 ? isbn : EditableBook.ISBN13,
+            Title = EditableBook.Title,
+            Subtitle = EditableBook.Subtitle,
+            Description = EditableBook.Description,
+            Author = EditableBook.Author,
+            Publisher = EditableBook.Publisher,
+            PublishedDate = EditableBook.PublishedDate,
+            PageCount = EditableBook.PageCount,
+            Language = EditableBook.Language,
+            CoverUrl = EditableBook.CoverUrl,
+            CoverImage = EditableBook.CoverImage,
+            Format = EditableBook.Format,
+            Status = EditableBook.Status,
+            Rating = EditableBook.Rating,
+            PersonalNotes = EditableBook.PersonalNotes,
+            CurrentPage = EditableBook.CurrentPage,
+            TotalPages = EditableBook.TotalPages,
+            DateAdded = EditableBook.DateAdded,
+            DateStarted = EditableBook.DateStarted,
+            DateFinished = EditableBook.DateFinished,
+            Favorite = EditableBook.Favorite,
+            Owned = EditableBook.Owned,
+            Wishlist = EditableBook.Wishlist,
+            PricePaid = EditableBook.PricePaid,
+            LocationOnShelf = EditableBook.LocationOnShelf
+        };
+
+        await LookupByIsbnAsync(cancellationToken);
+    }
+
+    [RelayCommand]
+    private static async Task ScanIsbnAsync()
+    {
+        await Shell.Current.GoToAsync("IsbnScannerPage");
+    }
+
     [RelayCommand]
     private async Task LookupByIsbnAsync(CancellationToken cancellationToken)
     {

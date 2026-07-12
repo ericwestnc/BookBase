@@ -5,6 +5,7 @@ using BookBase.Repositories;
 using BookBase.Services;
 using BookBase.ViewModels;
 using CommunityToolkit.Maui;
+using ZXing.Net.Maui.Controls;
 
 namespace BookBase;
 
@@ -16,6 +17,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
+            .UseBarcodeReader()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -32,17 +34,27 @@ public static class MauiProgram
         builder.Services.AddSingleton<IBackupService, BackupService>();
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
 
+#if ANDROID
+        builder.Services.AddSingleton<IIsbnTextRecognitionService,
+            BookBase.Platforms.Android.AndroidIsbnTextRecognitionService>();
+#else
+        builder.Services.AddSingleton<IIsbnTextRecognitionService,
+            UnsupportedIsbnTextRecognitionService>();
+#endif
+
         builder.Services.AddHttpClient(nameof(BookLookupService));
 
         builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddTransient<LibraryViewModel>();
         builder.Services.AddTransient<BookDetailsViewModel>();
         builder.Services.AddTransient<AddEditBookViewModel>();
+        builder.Services.AddTransient<IsbnScannerViewModel>();
 
         builder.Services.AddTransient<Views.DashboardPage>();
         builder.Services.AddTransient<Views.LibraryPage>();
         builder.Services.AddTransient<Views.BookDetailsPage>();
         builder.Services.AddTransient<Views.AddEditBookPage>();
+        builder.Services.AddTransient<Views.IsbnScannerPage>();
 
         builder.Services.AddSingleton<BoolInverseConverter>();
 

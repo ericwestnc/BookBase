@@ -35,5 +35,9 @@
     <PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="ZXing.Net.Maui" Version="0.10.3" />
+    <PackageReference Include="ZXing.Net.Maui.Controls" Version="0.10.3" />
+    <PackageReference Include="Xamarin.Google.MLKit.TextRecognition" Version="116.0.1.8"
+                      Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
   </ItemGroup>
 </Project>

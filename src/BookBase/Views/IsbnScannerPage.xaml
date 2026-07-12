@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.Maui.Controls"
+             xmlns:converters="clr-namespace:BookBase.Converters"
+             x:Class="BookBase.Views.IsbnScannerPage"
+             Title="{Binding Title}"
+             BackgroundColor="Black">
+
+    <ContentPage.Resources>
+        <converters:BoolInverseConverter x:Key="BoolInverseConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*, Auto">
+
+        <!-- ── Barcode scan mode ── -->
+        <Grid Grid.Row="0"
+              IsVisible="{Binding IsBarcodeScanMode}">
+
+            <!-- Live camera view -->
+            <zxing:CameraBarcodeReaderView
+                x:Name="BarcodeReaderView"
+                IsDetecting="{Binding IsDetecting}"
+                BarcodesDetected="OnBarcodesDetected"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill" />
+
+            <!-- Viewfinder overlay -->
+            <Frame Margin="40"
+                   CornerRadius="8"
+                   BackgroundColor="Transparent"
+                   BorderColor="White"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   WidthRequest="260"
+                   HeightRequest="100"
+                   IsInputTransparent="True" />
+
+            <!-- Instruction -->
+            <Label Text="{Binding StatusMessage}"
+                   TextColor="White"
+                   FontSize="14"
+                   HorizontalTextAlignment="Center"
+                   VerticalOptions="End"
+                   Margin="16,0,16,16"
+                   InputTransparent="True" />
+        </Grid>
+
+        <!-- ── OCR mode ── -->
+        <ScrollView Grid.Row="0"
+                    IsVisible="{Binding IsBarcodeScanMode, Converter={StaticResource BoolInverseConverter}}">
+            <VerticalStackLayout Padding="16" Spacing="16">
+
+                <Label Text="{Binding StatusMessage}"
+                       TextColor="White"
+                       FontSize="14"
+                       HorizontalTextAlignment="Center" />
+
+                <!-- Take Photo button -->
+                <Button Text="Take Photo of ISBN"
+                        Command="{Binding TakePhotoForOcrCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource BoolInverseConverter}}"
+                        HorizontalOptions="Center" />
+
+                <!-- Activity indicator while recognizing -->
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="White"
+                                   HorizontalOptions="Center" />
+
+                <!-- OCR results list (visible when candidates exist) -->
+                <VerticalStackLayout IsVisible="{Binding HasOcrCandidates}"
+                                     Spacing="8">
+
+                    <Label Text="Select an ISBN:"
+                           TextColor="White"
+                           FontAttributes="Bold" />
+
+                    <CollectionView ItemsSource="{Binding OcrCandidates}"
+                                    SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedOcrIsbn}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="{x:Type x:String}">
+                                <Frame BackgroundColor="#333"
+                                       BorderColor="#555"
+                                       CornerRadius="6"
+                                       Padding="12,8"
+                                       Margin="0,2">
+                                    <Label Text="{Binding .}"
+                                           TextColor="White"
+                                           FontFamily="OpenSansRegular" />
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Button Text="Confirm ISBN"
+                            Command="{Binding ConfirmOcrIsbnCommand}"
+                            HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ── Bottom toolbar ── -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*, *"
+              BackgroundColor="#1A1A1A"
+              Padding="16">
+
+            <!-- Shown in barcode mode: switch to OCR -->
+            <Button Grid.Column="0"
+                    Text="Read Printed ISBN"
+                    Command="{Binding SwitchToOcrModeCommand}"
+                    IsVisible="{Binding IsBarcodeScanMode}"
+                    BackgroundColor="#444"
+                    TextColor="White"
+                    Margin="4" />
+
+            <!-- Shown in OCR mode: switch back to barcode -->
+            <Button Grid.Column="0"
+                    Text="Scan Barcode Instead"
+                    Command="{Binding SwitchToBarcodeScanModeCommand}"
+                    IsVisible="{Binding IsBarcodeScanMode, Converter={StaticResource BoolInverseConverter}}"
+                    BackgroundColor="#444"
+                    TextColor="White"
+                    Margin="4" />
+
+            <Button Grid.Column="1"
+                    Text="Cancel"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="#444"
+                    TextColor="White"
+                    Margin="4" />
+        </Grid>
+
+    </Grid>
+
+</ContentPage>
