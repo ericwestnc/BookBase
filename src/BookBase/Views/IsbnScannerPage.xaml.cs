@@ -71,7 +71,7 @@ public partial class IsbnScannerPage : ContentPage
 
                 // Re-enable detection only when the ViewModel says to (i.e.,
                 // the value was not a valid ISBN).
-                if (vm.IsDetecting == false && vm.IsBarcodeScanMode)
+                if (!vm.IsDetecting && vm.IsBarcodeScanMode)
                 {
                     await Task.Delay(1500); // brief pause before retrying
                     BarcodeReaderView.IsDetecting = vm.IsBarcodeScanMode;

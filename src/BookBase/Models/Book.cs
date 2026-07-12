@@ -33,4 +33,7 @@ public sealed class Book : BaseEntity
     public bool Wishlist { get; set; }
     public decimal PricePaid { get; set; }
     public string? LocationOnShelf { get; set; }
+
+    /// <summary>Returns a shallow copy of this <see cref="Book"/> instance.</summary>
+    public Book Clone() => (Book)MemberwiseClone();
 }

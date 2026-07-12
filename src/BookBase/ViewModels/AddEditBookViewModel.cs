@@ -33,36 +33,15 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
             return;
         }
 
-        EditableBook = new Book
-        {
-            Id = EditableBook.Id,
-            ISBN10 = isbn.Length == 10 ? isbn : EditableBook.ISBN10,
-            ISBN13 = isbn.Length == 13 ? isbn : EditableBook.ISBN13,
-            Title = EditableBook.Title,
-            Subtitle = EditableBook.Subtitle,
-            Description = EditableBook.Description,
-            Author = EditableBook.Author,
-            Publisher = EditableBook.Publisher,
-            PublishedDate = EditableBook.PublishedDate,
-            PageCount = EditableBook.PageCount,
-            Language = EditableBook.Language,
-            CoverUrl = EditableBook.CoverUrl,
-            CoverImage = EditableBook.CoverImage,
-            Format = EditableBook.Format,
-            Status = EditableBook.Status,
-            Rating = EditableBook.Rating,
-            PersonalNotes = EditableBook.PersonalNotes,
-            CurrentPage = EditableBook.CurrentPage,
-            TotalPages = EditableBook.TotalPages,
-            DateAdded = EditableBook.DateAdded,
-            DateStarted = EditableBook.DateStarted,
-            DateFinished = EditableBook.DateFinished,
-            Favorite = EditableBook.Favorite,
-            Owned = EditableBook.Owned,
-            Wishlist = EditableBook.Wishlist,
-            PricePaid = EditableBook.PricePaid,
-            LocationOnShelf = EditableBook.LocationOnShelf
-        };
+        // Clone the current book so the UI refreshes (Book doesn't implement
+        // INotifyPropertyChanged; only replacing the EditableBook reference triggers
+        // the observable update).
+        var updated = EditableBook.Clone();
+        if (isbn.Length == 13)
+            updated.ISBN13 = isbn;
+        else if (isbn.Length == 10)
+            updated.ISBN10 = isbn;
+        EditableBook = updated;
 
         await LookupByIsbnAsync(cancellationToken);
     }

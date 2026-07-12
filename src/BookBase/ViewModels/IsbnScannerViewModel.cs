@@ -150,7 +150,7 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
                 return;
             }
 
-            StatusMessage = "Recognising text…";
+            StatusMessage = "Recognizing text…";
 
             await using var stream = await photo.OpenReadAsync();
             var candidates = await _textRecognitionService
