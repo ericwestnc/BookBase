@@ -7,10 +7,12 @@ public sealed class SqliteDatabase
 {
     private readonly SQLiteAsyncConnection _connection;
 
-    public SqliteDatabase()
+    public SqliteDatabase(string? dbPath = null)
     {
-        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "bookbase.db3");
-        _connection = new SQLiteAsyncConnection(dbPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.SharedCache);
+        var resolvedPath = string.IsNullOrWhiteSpace(dbPath)
+            ? Path.Combine(FileSystem.AppDataDirectory, "bookbase.db3")
+            : dbPath;
+        _connection = new SQLiteAsyncConnection(resolvedPath, SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.SharedCache);
     }
 
     public SQLiteAsyncConnection Connection => _connection;

@@ -33,6 +33,12 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         var book = await _bookLookupService.LookupByIsbnAsync(isbn, cancellationToken);
         if (book is not null)
         {
+            if (book.Id > 0)
+            {
+                EditableBook = book;
+                return;
+            }
+
             EditableBook = new Book
             {
                 Id = EditableBook.Id,

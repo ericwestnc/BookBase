@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/BookBase/BookBase.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BookBase.Tests/BookBase.Tests.csproj" />
+  </Folder>
 </Solution>

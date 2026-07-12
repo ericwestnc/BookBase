@@ -1,6 +1,7 @@
 using System.Text.Json;
 using BookBase.Interfaces;
 using BookBase.Models;
+using BookBase.Utilities;
 
 namespace BookBase.Services;
 
@@ -17,7 +18,7 @@ public sealed class BookLookupService : IBookLookupService
 
     public async Task<Book?> LookupByIsbnAsync(string isbn, CancellationToken cancellationToken = default)
     {
-        var normalized = isbn.Replace("-", string.Empty, StringComparison.Ordinal).Trim();
+        var normalized = IsbnNormalizer.Normalize(isbn);
         if (string.IsNullOrWhiteSpace(normalized))
         {
             return null;
@@ -32,14 +33,12 @@ public sealed class BookLookupService : IBookLookupService
         var fromOpenLibrary = await QueryOpenLibraryAsync(normalized, cancellationToken);
         if (fromOpenLibrary is not null)
         {
-            await _bookRepository.SaveAsync(fromOpenLibrary, cancellationToken);
             return fromOpenLibrary;
         }
 
         var fromGoogleBooks = await QueryGoogleBooksAsync(normalized, cancellationToken);
         if (fromGoogleBooks is not null)
         {
-            await _bookRepository.SaveAsync(fromGoogleBooks, cancellationToken);
             return fromGoogleBooks;
         }
 
@@ -61,6 +60,7 @@ public sealed class BookLookupService : IBookLookupService
 
         return new Book
         {
+            Id = 0,
             ISBN10 = isbn.Length == 10 ? isbn : null,
             ISBN13 = isbn.Length == 13 ? isbn : null,
             Title = root.TryGetProperty("title", out var title) ? title.GetString() ?? "Untitled" : "Untitled",
@@ -101,6 +101,7 @@ public sealed class BookLookupService : IBookLookupService
 
         return new Book
         {
+            Id = 0,
             ISBN10 = isbn.Length == 10 ? isbn : null,
             ISBN13 = isbn.Length == 13 ? isbn : null,
             Title = volumeInfo.TryGetProperty("title", out var title) ? title.GetString() ?? "Untitled" : "Untitled",
