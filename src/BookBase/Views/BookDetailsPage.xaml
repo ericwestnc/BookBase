@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookBase.Views.BookDetailsPage"
+             Title="Book Details">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+            <Image HeightRequest="240" Aspect="AspectFit" Source="{Binding Book.CoverUrl}" />
+            <Label Text="{Binding Book.Title}" FontAttributes="Bold" FontSize="24" />
+            <Label Text="{Binding Book.Author}" FontSize="16" />
+            <Label Text="{Binding Book.Description}" />
+            <ProgressBar Progress="{Binding Progress}" />
+            <Label Text="{Binding Book.PersonalNotes}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

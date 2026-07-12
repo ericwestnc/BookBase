@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookBase.Views.AddEditBookPage"
+             Title="Add / Edit Book">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="10">
+            <Entry Placeholder="ISBN-13" Text="{Binding EditableBook.ISBN13}" />
+            <Entry Placeholder="ISBN-10" Text="{Binding EditableBook.ISBN10}" />
+            <Button Text="Lookup ISBN" Command="{Binding LookupByIsbnCommand}" />
+            <Entry Placeholder="Title" Text="{Binding EditableBook.Title}" />
+            <Entry Placeholder="Author" Text="{Binding EditableBook.Author}" />
+            <Entry Placeholder="Publisher" Text="{Binding EditableBook.Publisher}" />
+            <Editor Placeholder="Notes" Text="{Binding EditableBook.PersonalNotes}" AutoSize="TextChanges" />
+            <Button Text="Save" Command="{Binding SaveCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

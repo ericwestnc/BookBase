@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BookBase.Views.DashboardPage"
+             Title="Dashboard">
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="12">
+                <Frame CornerRadius="12" Padding="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Currently Reading" FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.CurrentlyReading}" FontSize="24" />
+                        <Label Text="Books Finished This Year" FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.BooksFinishedThisYear}" />
+                        <Label Text="Books Owned" FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.BooksOwned}" />
+                        <Label Text="Wishlist Count" FontAttributes="Bold" />
+                        <Label Text="{Binding Statistics.WishlistCount}" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Label Text="Newest Books" FontAttributes="Bold" FontSize="18" />
+                <CollectionView ItemsSource="{Binding NewestBooks}" ItemsLayout="HorizontalList">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Margin="0,0,8,0" Padding="8" CornerRadius="10">
+                                <VerticalStackLayout WidthRequest="180">
+                                    <Label Text="{Binding Title}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Author}" FontSize="12" />
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+                <Label Text="Recently Finished" FontAttributes="Bold" FontSize="18" />
+                <CollectionView ItemsSource="{Binding RecentlyFinished}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                <Label Text="{Binding Title}" />
+                                <Label Grid.Column="1" Text="{Binding DateFinished, StringFormat='{0:yyyy-MM-dd}'}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>
