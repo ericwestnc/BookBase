@@ -33,6 +33,9 @@ public static class MauiProgram
         builder.Services.AddSingleton<IImportExportService, ImportExportService>();
         builder.Services.AddSingleton<IBackupService, BackupService>();
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
+        builder.Services.AddSingleton<IBarcodeRecognitionService, BarcodeRecognitionService>();
+        builder.Services.AddSingleton<IPrintedIsbnRecognitionService, PrintedIsbnRecognitionService>();
+        builder.Services.AddSingleton<IManualEntryService, ManualEntryService>();
 
 #if ANDROID
         builder.Services.AddSingleton<IIsbnTextRecognitionService,

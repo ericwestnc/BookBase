@@ -1,6 +1,5 @@
 using BookBase.Interfaces;
 using BookBase.Models;
-using BookBase.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ZXing.Net.Maui;
@@ -28,17 +27,20 @@ namespace BookBase.ViewModels;
 /// </summary>
 public sealed partial class IsbnScannerViewModel : BaseViewModel
 {
-    private readonly IIsbnTextRecognitionService _textRecognitionService;
+    private readonly IBarcodeRecognitionService _barcodeRecognitionService;
+    private readonly IPrintedIsbnRecognitionService _printedIsbnRecognitionService;
     private readonly IBookRepository _bookRepository;
 
     public IsbnScannerViewModel(
-        IIsbnTextRecognitionService textRecognitionService,
+        IBarcodeRecognitionService barcodeRecognitionService,
+        IPrintedIsbnRecognitionService printedIsbnRecognitionService,
         IBookRepository bookRepository)
     {
-        _textRecognitionService = textRecognitionService;
+        _barcodeRecognitionService = barcodeRecognitionService;
+        _printedIsbnRecognitionService = printedIsbnRecognitionService;
         _bookRepository = bookRepository;
         Title = "Scan ISBN";
-        StatusMessage = "Point the camera at a book barcode.";
+        StatusMessage = "Point your camera at the barcode.";
     }
 
     // ------------------------------------------------------------------ //
@@ -87,17 +89,10 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
             return;
         }
 
-        var normalized = IsbnNormalizer.Normalize(rawValue);
-
-        if (!IsLikelyBookBarcode(normalized, format))
+        var normalized = _barcodeRecognitionService.TryRecognizeIsbn(rawValue, format);
+        if (string.IsNullOrWhiteSpace(normalized))
         {
-            // Resume detection – not a book barcode.
-            return;
-        }
-
-        if (!IsbnValidator.IsValid(normalized))
-        {
-            StatusMessage = "Barcode detected but ISBN checksum failed. Keep scanning…";
+            StatusMessage = "Point your camera at the barcode.";
             return;
         }
 
@@ -135,14 +130,14 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
                 {
                     System.Diagnostics.Debug.WriteLine($"[IsbnScannerViewModel] Navigation to BookDetailsPage failed: {ex}");
                     // Resume scanning so the user is not left in a broken state.
-                    StatusMessage = "Point the camera at a book barcode.";
+                    StatusMessage = "Point your camera at the barcode.";
                     IsDetecting = true;
                 }
             }
             else
             {
                 // Resume scanning.
-                StatusMessage = "Point the camera at a book barcode.";
+                StatusMessage = "Point your camera at the barcode.";
                 IsDetecting = true;
             }
 
@@ -166,7 +161,7 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
         IsDetecting = false;
         OcrCandidates = [];
         SelectedOcrIsbn = null;
-        StatusMessage = "Take a photo of the printed ISBN text.";
+        StatusMessage = "Take a photo of the printed ISBN number (such as the copyright page or the number below the barcode).";
     }
 
     /// <summary>Switch back to live barcode scanning mode.</summary>
@@ -177,7 +172,7 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
         IsDetecting = true;
         OcrCandidates = [];
         SelectedOcrIsbn = null;
-        StatusMessage = "Point the camera at a book barcode.";
+        StatusMessage = "Point your camera at the barcode.";
     }
 
     /// <summary>
@@ -206,21 +201,27 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
             StatusMessage = "Recognizing text…";
 
             await using var stream = await photo.OpenReadAsync();
-            var candidates = await _textRecognitionService
+            var candidates = await _printedIsbnRecognitionService
                 .RecognizeIsbnCandidatesAsync(stream, cancellationToken);
 
             if (candidates.Count == 0)
             {
-                StatusMessage = "No ISBN found in photo. Try again or type the ISBN manually.";
+                StatusMessage = "No ISBN found. Retake the photo, or enter the ISBN manually on the Add/Edit page.";
                 return;
             }
 
             OcrCandidates = candidates;
+            if (candidates.Count == 1)
+            {
+                SelectedOcrIsbn = candidates[0];
+                StatusMessage = "ISBN found. Looking up book details…";
+                await ConfirmIsbnAsync(candidates[0], cancellationToken);
+                return;
+            }
+
             SelectedOcrIsbn = candidates[0];
 
-            StatusMessage = candidates.Count == 1
-                ? "ISBN found. Confirm to continue."
-                : $"{candidates.Count} ISBNs found. Select one and confirm.";
+            StatusMessage = $"{candidates.Count} ISBNs found. Select one and confirm.";
         }
         catch (FeatureNotSupportedException)
         {
@@ -268,30 +269,13 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
         await Shell.Current.GoToAsync($"..?scannedIsbn={Uri.EscapeDataString(isbn)}");
     }
 
-    private static bool IsLikelyBookBarcode(string normalized, BarcodeFormat format)
+    public void ShowBarcodeTroubleHint()
     {
-        return format switch
+        if (!IsBarcodeScanMode || !IsDetecting)
         {
-            BarcodeFormat.Ean13 =>
-                (normalized.StartsWith("978", StringComparison.Ordinal) ||
-                 normalized.StartsWith("979", StringComparison.Ordinal)),
+            return;
+        }
 
-            BarcodeFormat.UpcA =>
-                // UPC-A (12 digits) is uncommon for ISBNs but some older editions
-                // have a UPC barcode equivalent.  Accept if digits only.
-                normalized.Length == 12 && normalized.All(char.IsAsciiDigit),
-
-            BarcodeFormat.Ean8 =>
-                // EAN-8 is never an ISBN but accept and let checksum decide.
-                normalized.Length == 8 && normalized.All(char.IsAsciiDigit),
-
-            BarcodeFormat.UpcE =>
-                // UPC-E is returned by ZXing in its compressed (8-digit) form.
-                // Accept both the 8-digit compressed form and the 12-digit
-                // expanded UPC-A equivalent so either representation is handled.
-                (normalized.Length == 8 || normalized.Length == 12) && normalized.All(char.IsAsciiDigit),
-
-            _ => false
-        };
+        StatusMessage = "Having trouble? Try better lighting or use Read Printed ISBN.";
     }
 }

@@ -12,6 +12,8 @@ namespace BookBase.Views;
 /// </summary>
 public partial class IsbnScannerPage : ContentPage
 {
+    private readonly TimeSpan _barcodeHintDelay = TimeSpan.FromSeconds(7);
+
     public IsbnScannerPage()
     {
         InitializeComponent();
@@ -35,6 +37,7 @@ public partial class IsbnScannerPage : ContentPage
     {
         base.OnAppearing();
         _ = RequestCameraPermissionAndStartAsync();
+        ScheduleBarcodeTroubleHint();
     }
 
     private async Task RequestCameraPermissionAndStartAsync()
@@ -107,17 +110,49 @@ public partial class IsbnScannerPage : ContentPage
         {
             if (BindingContext is IsbnScannerViewModel vm)
             {
+                TryPerformHapticFeedback();
                 await vm.HandleBarcodeDetectedAsync(first.Value, first.Format);
 
                 // Re-enable detection only when the ViewModel says to (i.e.,
                 // the value was not a valid ISBN).
-                if (!vm.IsDetecting && vm.IsBarcodeScanMode)
+                if (vm.IsDetecting && vm.IsBarcodeScanMode)
                 {
-                    await Task.Delay(1500); // brief pause before retrying
+                    await Task.Delay(750); // brief pause before retrying
                     BarcodeReaderView.IsDetecting = vm.IsBarcodeScanMode;
                     vm.IsDetecting = vm.IsBarcodeScanMode;
+                    ScheduleBarcodeTroubleHint();
                 }
             }
         });
+    }
+
+    private void OnToggleFlashlightClicked(object? sender, EventArgs e)
+    {
+        BarcodeReaderView.IsTorchOn = !BarcodeReaderView.IsTorchOn;
+        FlashlightButton.Text = BarcodeReaderView.IsTorchOn ? "Flashlight On" : "Flashlight";
+    }
+
+    private void ScheduleBarcodeTroubleHint()
+    {
+        Dispatcher.StartTimer(_barcodeHintDelay, () =>
+        {
+            if (BindingContext is IsbnScannerViewModel vm && vm.IsBarcodeScanMode && vm.IsDetecting)
+            {
+                vm.ShowBarcodeTroubleHint();
+            }
+
+            return false;
+        });
+    }
+
+    private static void TryPerformHapticFeedback()
+    {
+        try
+        {
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+        }
+        catch (FeatureNotSupportedException)
+        {
+        }
     }
 }

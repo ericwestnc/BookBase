@@ -25,11 +25,16 @@
   <ItemGroup>
     <Compile Include="../../src/BookBase/Interfaces/IBookLookupService.cs" Link="Source/Interfaces/IBookLookupService.cs" />
     <Compile Include="../../src/BookBase/Interfaces/IBookRepository.cs" Link="Source/Interfaces/IBookRepository.cs" />
+    <Compile Include="../../src/BookBase/Interfaces/IIsbnTextRecognitionService.cs" Link="Source/Interfaces/IIsbnTextRecognitionService.cs" />
+    <Compile Include="../../src/BookBase/Interfaces/IManualEntryService.cs" Link="Source/Interfaces/IManualEntryService.cs" />
+    <Compile Include="../../src/BookBase/Interfaces/IPrintedIsbnRecognitionService.cs" Link="Source/Interfaces/IPrintedIsbnRecognitionService.cs" />
     <Compile Include="../../src/BookBase/Interfaces/IRepository.cs" Link="Source/Interfaces/IRepository.cs" />
     <Compile Include="../../src/BookBase/Models/*.cs" Link="Source/Models/%(Filename)%(Extension)" />
     <Compile Include="../../src/BookBase/Data/SqliteDatabase.cs" Link="Source/Data/SqliteDatabase.cs" />
     <Compile Include="../../src/BookBase/Repositories/BookRepository.cs" Link="Source/Repositories/BookRepository.cs" />
     <Compile Include="../../src/BookBase/Services/BookLookupService.cs" Link="Source/Services/BookLookupService.cs" />
+    <Compile Include="../../src/BookBase/Services/ManualEntryService.cs" Link="Source/Services/ManualEntryService.cs" />
+    <Compile Include="../../src/BookBase/Services/PrintedIsbnRecognitionService.cs" Link="Source/Services/PrintedIsbnRecognitionService.cs" />
     <Compile Include="../../src/BookBase/Utilities/IsbnNormalizer.cs" Link="Source/Utilities/IsbnNormalizer.cs" />
     <Compile Include="../../src/BookBase/Utilities/IsbnValidator.cs" Link="Source/Utilities/IsbnValidator.cs" />
     <Compile Include="../../src/BookBase/Utilities/IsbnExtractor.cs" Link="Source/Utilities/IsbnExtractor.cs" />

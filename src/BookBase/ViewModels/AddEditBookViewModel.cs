@@ -1,5 +1,6 @@
 using BookBase.Interfaces;
 using BookBase.Models;
+using BookBase.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -9,11 +10,18 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
 {
     private readonly IBookRepository _bookRepository;
     private readonly IBookLookupService _bookLookupService;
+    private readonly Func<string, string?> _manualIsbnNormalizer;
 
-    public AddEditBookViewModel(IBookRepository bookRepository, IBookLookupService bookLookupService)
+    public AddEditBookViewModel(
+        IBookRepository bookRepository,
+        IBookLookupService bookLookupService,
+        IManualEntryService? manualEntryService = null)
     {
         _bookRepository = bookRepository;
         _bookLookupService = bookLookupService;
+        _manualIsbnNormalizer = manualEntryService is null
+            ? DefaultNormalizeManualIsbn
+            : manualEntryService.TryNormalize;
         Title = "Add / Edit Book";
         EditableBook = CreateDefaultBook();
     }
@@ -28,7 +36,8 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
     /// </summary>
     public async Task ApplyScannedIsbnAsync(string isbn, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(isbn))
+        var normalized = _manualIsbnNormalizer(isbn);
+        if (string.IsNullOrWhiteSpace(normalized))
         {
             return;
         }
@@ -37,10 +46,10 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         // INotifyPropertyChanged; only replacing the EditableBook reference triggers
         // the observable update).
         var updated = EditableBook.Clone();
-        if (isbn.Length == 13)
-            updated.ISBN13 = isbn;
-        else if (isbn.Length == 10)
-            updated.ISBN10 = isbn;
+        if (normalized.Length == 13)
+            updated.ISBN13 = normalized;
+        else if (normalized.Length == 10)
+            updated.ISBN10 = normalized;
         EditableBook = updated;
 
         await LookupByIsbnAsync(cancellationToken);
@@ -61,7 +70,22 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         }
 
         var isbn = EditableBook.ISBN13 ?? EditableBook.ISBN10!;
-        var book = await _bookLookupService.LookupByIsbnAsync(isbn, cancellationToken);
+        var normalized = _manualIsbnNormalizer(isbn);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return;
+        }
+
+        if (normalized.Length == 13)
+        {
+            EditableBook.ISBN13 = normalized;
+        }
+        else
+        {
+            EditableBook.ISBN10 = normalized;
+        }
+
+        var book = await _bookLookupService.LookupByIsbnAsync(normalized, cancellationToken);
         if (book is not null)
         {
             if (book.Id > 0)
@@ -131,4 +155,10 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         DateAdded = DateTimeOffset.UtcNow,
         Status = ReadingStatus.WantToRead
     };
+
+    private static string? DefaultNormalizeManualIsbn(string rawValue)
+    {
+        var normalized = IsbnNormalizer.Normalize(rawValue);
+        return IsbnValidator.IsValid(normalized) ? normalized : null;
+    }
 }

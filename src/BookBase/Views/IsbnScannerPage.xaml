@@ -44,6 +44,19 @@
                    VerticalOptions="End"
                    Margin="16,0,16,16"
                    InputTransparent="True" />
+
+            <Button Text="Flashlight"
+                   x:Name="FlashlightButton"
+                   Clicked="OnToggleFlashlightClicked"
+                   HorizontalOptions="End"
+                   VerticalOptions="End"
+                   Margin="16"
+                   Padding="16,10"
+                   FontSize="13"
+                   BackgroundColor="#66000000"
+                   TextColor="White"
+                   SemanticProperties.Description="Toggle camera flashlight"
+                   IsVisible="{Binding IsBarcodeScanMode}" />
         </Grid>
 
         <!-- ── OCR mode ── -->
@@ -110,11 +123,14 @@
 
             <!-- Shown in barcode mode: switch to OCR -->
             <Button Grid.Column="0"
-                    Text="Read Printed ISBN"
+                    Text="Can’t scan the barcode? Read Printed ISBN"
                     Command="{Binding SwitchToOcrModeCommand}"
                     IsVisible="{Binding IsBarcodeScanMode}"
                     BackgroundColor="#444"
                     TextColor="White"
+                    FontSize="13"
+                    Padding="14,12"
+                    SemanticProperties.Description="Switch to printed ISBN reader"
                     Margin="4" />
 
             <!-- Shown in OCR mode: switch back to barcode -->
@@ -131,6 +147,8 @@
                     Command="{Binding CancelCommand}"
                     BackgroundColor="#444"
                     TextColor="White"
+                    Padding="14,12"
+                    SemanticProperties.Description="Cancel scanning and return"
                     Margin="4" />
         </Grid>
 
