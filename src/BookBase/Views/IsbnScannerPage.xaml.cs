@@ -23,7 +23,7 @@ public partial class IsbnScannerPage : ContentPage
             Formats = BarcodeFormat.Ean13
                       | BarcodeFormat.UpcA
                       | BarcodeFormat.Ean8
-                      | BarcodeFormat.Code128,
+                      | BarcodeFormat.UpcE,
             Multiple = false,
             AutoRotate = true,
             TryHarder = true
@@ -34,10 +34,42 @@ public partial class IsbnScannerPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        _ = RequestCameraPermissionAndStartAsync();
+    }
 
-        if (BindingContext is IsbnScannerViewModel vm && vm.IsBarcodeScanMode)
+    private async Task RequestCameraPermissionAndStartAsync()
+    {
+        var status = await Permissions.CheckStatusAsync<Permissions.Camera>();
+
+        if (status != PermissionStatus.Granted)
         {
-            BarcodeReaderView.IsDetecting = true;
+            status = await Permissions.RequestAsync<Permissions.Camera>();
+        }
+
+        if (status == PermissionStatus.Granted)
+        {
+            if (BindingContext is IsbnScannerViewModel vm && vm.IsBarcodeScanMode)
+            {
+                BarcodeReaderView.IsDetecting = true;
+            }
+        }
+        else
+        {
+            // Camera permission denied – show a friendly explanation.
+            bool openSettings = await Shell.Current.DisplayAlert(
+                "Camera Required",
+                "BookBase requires camera access to scan book barcodes and ISBNs. Please grant camera permission in Settings.",
+                "Open Settings",
+                "Cancel");
+
+            if (openSettings)
+            {
+                AppInfo.ShowSettingsUI();
+            }
+            else
+            {
+                await Shell.Current.GoToAsync("..");
+            }
         }
     }
 

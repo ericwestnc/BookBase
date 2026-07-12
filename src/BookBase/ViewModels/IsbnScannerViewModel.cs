@@ -28,10 +28,14 @@ namespace BookBase.ViewModels;
 public sealed partial class IsbnScannerViewModel : BaseViewModel
 {
     private readonly IIsbnTextRecognitionService _textRecognitionService;
+    private readonly IBookRepository _bookRepository;
 
-    public IsbnScannerViewModel(IIsbnTextRecognitionService textRecognitionService)
+    public IsbnScannerViewModel(
+        IIsbnTextRecognitionService textRecognitionService,
+        IBookRepository bookRepository)
     {
         _textRecognitionService = textRecognitionService;
+        _bookRepository = bookRepository;
         Title = "Scan ISBN";
         StatusMessage = "Point the camera at a book barcode.";
     }
@@ -96,7 +100,32 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
             return;
         }
 
-        // Valid ISBN – stop detection and navigate back.
+        // Check for duplicates in the local library before navigating.
+        var existing = await _bookRepository.GetByIsbnAsync(normalized, cancellationToken);
+        if (existing is not null)
+        {
+            IsDetecting = false;
+            bool viewBook = await Shell.Current.DisplayAlert(
+                "Already in Library",
+                "This book already exists in your library.",
+                "View Book",
+                "Scan Another");
+
+            if (viewBook)
+            {
+                await Shell.Current.GoToAsync($"../BookDetailsPage?bookId={existing.Id}");
+            }
+            else
+            {
+                // Resume scanning.
+                StatusMessage = "Point the camera at a book barcode.";
+                IsDetecting = true;
+            }
+
+            return;
+        }
+
+        // Valid ISBN, not a duplicate – stop detection and navigate back.
         IsDetecting = false;
         await ConfirmIsbnAsync(normalized, cancellationToken);
     }
@@ -232,10 +261,10 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
                 // EAN-8 is never an ISBN but accept and let checksum decide.
                 normalized.Length == 8 && normalized.All(char.IsAsciiDigit),
 
-            BarcodeFormat.Code128 =>
-                // CODE-128 may encode a raw 10- or 13-digit ISBN string.
-                (normalized.Length == 10 || normalized.Length == 13)
-                    && normalized.All(c => char.IsAsciiDigit(c) || c == 'X'),
+            BarcodeFormat.UpcE =>
+                // UPC-E (8 digits, compressed form of UPC-A) – accept and
+                // let the checksum validator decide.
+                normalized.Length == 8 && normalized.All(char.IsAsciiDigit),
 
             _ => false
         };
