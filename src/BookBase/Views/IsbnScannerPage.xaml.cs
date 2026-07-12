@@ -13,6 +13,7 @@ namespace BookBase.Views;
 public partial class IsbnScannerPage : ContentPage
 {
     private readonly TimeSpan _barcodeHintDelay = TimeSpan.FromSeconds(7);
+    private readonly TimeSpan _barcodeRetryDelay = TimeSpan.FromMilliseconds(750);
 
     public IsbnScannerPage()
     {
@@ -113,11 +114,12 @@ public partial class IsbnScannerPage : ContentPage
                 TryPerformHapticFeedback();
                 await vm.HandleBarcodeDetectedAsync(first.Value, first.Format);
 
-                // Re-enable detection only when the ViewModel says to (i.e.,
-                // the value was not a valid ISBN).
-                if (vm.IsDetecting && vm.IsBarcodeScanMode)
+                // Resume detection only when the ViewModel explicitly keeps
+                // detecting enabled (invalid/ignored result paths).
+                var shouldResumeDetection = vm.IsDetecting && vm.IsBarcodeScanMode;
+                if (shouldResumeDetection)
                 {
-                    await Task.Delay(750); // brief pause before retrying
+                    await Task.Delay(_barcodeRetryDelay);
                     BarcodeReaderView.IsDetecting = vm.IsBarcodeScanMode;
                     vm.IsDetecting = vm.IsBarcodeScanMode;
                     ScheduleBarcodeTroubleHint();
@@ -153,6 +155,7 @@ public partial class IsbnScannerPage : ContentPage
         }
         catch (FeatureNotSupportedException)
         {
+            System.Diagnostics.Debug.WriteLine("[IsbnScannerPage] Haptic feedback is not supported on this device.");
         }
     }
 }

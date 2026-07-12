@@ -10,18 +10,16 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
 {
     private readonly IBookRepository _bookRepository;
     private readonly IBookLookupService _bookLookupService;
-    private readonly Func<string, string?> _manualIsbnNormalizer;
+    private readonly IManualEntryService _manualEntryService;
 
     public AddEditBookViewModel(
         IBookRepository bookRepository,
         IBookLookupService bookLookupService,
-        IManualEntryService? manualEntryService = null)
+        IManualEntryService manualEntryService)
     {
         _bookRepository = bookRepository;
         _bookLookupService = bookLookupService;
-        _manualIsbnNormalizer = manualEntryService is null
-            ? DefaultNormalizeManualIsbn
-            : manualEntryService.TryNormalize;
+        _manualEntryService = manualEntryService;
         Title = "Add / Edit Book";
         EditableBook = CreateDefaultBook();
     }
@@ -36,7 +34,7 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
     /// </summary>
     public async Task ApplyScannedIsbnAsync(string isbn, CancellationToken cancellationToken = default)
     {
-        var normalized = _manualIsbnNormalizer(isbn);
+        var normalized = _manualEntryService.TryNormalize(isbn);
         if (string.IsNullOrWhiteSpace(normalized))
         {
             return;
@@ -46,10 +44,7 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         // INotifyPropertyChanged; only replacing the EditableBook reference triggers
         // the observable update).
         var updated = EditableBook.Clone();
-        if (normalized.Length == 13)
-            updated.ISBN13 = normalized;
-        else if (normalized.Length == 10)
-            updated.ISBN10 = normalized;
+        ApplyRecognizedIsbn(updated, normalized);
         EditableBook = updated;
 
         await LookupByIsbnAsync(cancellationToken);
@@ -70,20 +65,13 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         }
 
         var isbn = EditableBook.ISBN13 ?? EditableBook.ISBN10!;
-        var normalized = _manualIsbnNormalizer(isbn);
+        var normalized = _manualEntryService.TryNormalize(isbn);
         if (string.IsNullOrWhiteSpace(normalized))
         {
             return;
         }
 
-        if (normalized.Length == 13)
-        {
-            EditableBook.ISBN13 = normalized;
-        }
-        else
-        {
-            EditableBook.ISBN10 = normalized;
-        }
+        ApplyRecognizedIsbn(EditableBook, normalized);
 
         var book = await _bookLookupService.LookupByIsbnAsync(normalized, cancellationToken);
         if (book is not null)
@@ -156,9 +144,15 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
         Status = ReadingStatus.WantToRead
     };
 
-    private static string? DefaultNormalizeManualIsbn(string rawValue)
+    private static void ApplyRecognizedIsbn(Book book, string normalizedIsbn)
     {
-        var normalized = IsbnNormalizer.Normalize(rawValue);
-        return IsbnValidator.IsValid(normalized) ? normalized : null;
+        if (normalizedIsbn.Length == IsbnLengths.Isbn13)
+        {
+            book.ISBN13 = normalizedIsbn;
+        }
+        else if (normalizedIsbn.Length == IsbnLengths.Isbn10)
+        {
+            book.ISBN10 = normalizedIsbn;
+        }
     }
 }

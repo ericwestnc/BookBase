@@ -36,6 +36,7 @@
     <Compile Include="../../src/BookBase/Services/ManualEntryService.cs" Link="Source/Services/ManualEntryService.cs" />
     <Compile Include="../../src/BookBase/Services/PrintedIsbnRecognitionService.cs" Link="Source/Services/PrintedIsbnRecognitionService.cs" />
     <Compile Include="../../src/BookBase/Utilities/IsbnNormalizer.cs" Link="Source/Utilities/IsbnNormalizer.cs" />
+    <Compile Include="../../src/BookBase/Utilities/IsbnLengths.cs" Link="Source/Utilities/IsbnLengths.cs" />
     <Compile Include="../../src/BookBase/Utilities/IsbnValidator.cs" Link="Source/Utilities/IsbnValidator.cs" />
     <Compile Include="../../src/BookBase/Utilities/IsbnExtractor.cs" Link="Source/Utilities/IsbnExtractor.cs" />
     <Compile Include="../../src/BookBase/ViewModels/BaseViewModel.cs" Link="Source/ViewModels/BaseViewModel.cs" />

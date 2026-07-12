@@ -124,7 +124,7 @@ public sealed class BookLookupWorkflowTests
                 }
                 """)));
 
-        var viewModel = new AddEditBookViewModel(harness.Repository, service)
+        var viewModel = new AddEditBookViewModel(harness.Repository, service, new ManualEntryService())
         {
             EditableBook = new Book
             {
@@ -164,7 +164,7 @@ public sealed class BookLookupWorkflowTests
         var service = new BookLookupService(
             harness.Repository,
             new StubHttpClientFactory(_ => throw new InvalidOperationException("HTTP should not be used for local matches.")));
-        var viewModel = new AddEditBookViewModel(harness.Repository, service)
+        var viewModel = new AddEditBookViewModel(harness.Repository, service, new ManualEntryService())
         {
             EditableBook = new Book
             {
