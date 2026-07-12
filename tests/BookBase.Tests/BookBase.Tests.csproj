@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../../src/BookBase/Interfaces/IBookLookupService.cs" Link="Source/Interfaces/IBookLookupService.cs" />
+    <Compile Include="../../src/BookBase/Interfaces/IBookRepository.cs" Link="Source/Interfaces/IBookRepository.cs" />
+    <Compile Include="../../src/BookBase/Interfaces/IRepository.cs" Link="Source/Interfaces/IRepository.cs" />
+    <Compile Include="../../src/BookBase/Models/*.cs" Link="Source/Models/%(Filename)%(Extension)" />
+    <Compile Include="../../src/BookBase/Data/SqliteDatabase.cs" Link="Source/Data/SqliteDatabase.cs" />
+    <Compile Include="../../src/BookBase/Repositories/BookRepository.cs" Link="Source/Repositories/BookRepository.cs" />
+    <Compile Include="../../src/BookBase/Services/BookLookupService.cs" Link="Source/Services/BookLookupService.cs" />
+    <Compile Include="../../src/BookBase/Utilities/IsbnNormalizer.cs" Link="Source/Utilities/IsbnNormalizer.cs" />
+    <Compile Include="../../src/BookBase/ViewModels/BaseViewModel.cs" Link="Source/ViewModels/BaseViewModel.cs" />
+    <Compile Include="../../src/BookBase/ViewModels/AddEditBookViewModel.cs" Link="Source/ViewModels/AddEditBookViewModel.cs" />
+  </ItemGroup>
+</Project>
