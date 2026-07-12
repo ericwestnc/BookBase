@@ -12,6 +12,11 @@ namespace BookBase.Tests;
 
 public sealed class BookLookupWorkflowTests
 {
+    private const string NormalizedIsbn13 = "9781402894626";
+    private const string HyphenatedIsbn13 = "978-1-4028-9462-6";
+    private const string SpacedIsbn13 = "978 1 4028 9462 6";
+    private const string MixedIsbn13 = "978-1 4028-9462-6";
+
     [Fact]
     public async Task OpenLibraryLookup_ReturnsMetadata_WithoutSaving()
     {
@@ -27,11 +32,11 @@ public sealed class BookLookupWorkflowTests
                 }
                 """)));
 
-        var book = await service.LookupByIsbnAsync("978-1-4028-9462-6");
+        var book = await service.LookupByIsbnAsync(HyphenatedIsbn13);
 
         Assert.NotNull(book);
         Assert.Equal(0, book!.Id);
-        Assert.Equal("9781402894626", book.ISBN13);
+        Assert.Equal(NormalizedIsbn13, book.ISBN13);
         Assert.Equal("Open Library Title", book.Title);
         Assert.Equal(0, repository.SaveCallCount);
     }
@@ -71,11 +76,11 @@ public sealed class BookLookupWorkflowTests
                     """);
             }));
 
-        var book = await service.LookupByIsbnAsync("978 1 4028 9462 6");
+        var book = await service.LookupByIsbnAsync(SpacedIsbn13);
 
         Assert.NotNull(book);
         Assert.Equal(0, book!.Id);
-        Assert.Equal("9781402894626", book.ISBN13);
+        Assert.Equal(NormalizedIsbn13, book.ISBN13);
         Assert.Equal("Google Books Title", book.Title);
         Assert.Equal(0, repository.SaveCallCount);
     }
@@ -87,7 +92,7 @@ public sealed class BookLookupWorkflowTests
         var existing = new Book
         {
             Title = "Existing",
-            ISBN13 = "9781402894626",
+            ISBN13 = NormalizedIsbn13,
             Owned = true,
             Wishlist = false
         };
@@ -98,7 +103,7 @@ public sealed class BookLookupWorkflowTests
             harness.Repository,
             new StubHttpClientFactory(_ => throw new InvalidOperationException("HTTP should not be used for local matches.")));
 
-        var book = await service.LookupByIsbnAsync("978-1 4028-9462-6");
+        var book = await service.LookupByIsbnAsync(MixedIsbn13);
 
         Assert.NotNull(book);
         Assert.Equal(existing.Id, book!.Id);
@@ -123,7 +128,7 @@ public sealed class BookLookupWorkflowTests
         {
             EditableBook = new Book
             {
-                ISBN13 = "978-1-4028-9462-6",
+                ISBN13 = HyphenatedIsbn13,
                 Owned = false,
                 Wishlist = true
             }
@@ -138,7 +143,7 @@ public sealed class BookLookupWorkflowTests
 
         Assert.Single(books);
         Assert.Equal("Lookup Result", books[0].Title);
-        Assert.Equal("9781402894626", books[0].ISBN13);
+        Assert.Equal(NormalizedIsbn13, books[0].ISBN13);
     }
 
     [Fact]
@@ -148,7 +153,7 @@ public sealed class BookLookupWorkflowTests
         var existing = new Book
         {
             Title = "Already Stored",
-            ISBN13 = "9781402894626",
+            ISBN13 = NormalizedIsbn13,
             Owned = true,
             Wishlist = false,
             Status = ReadingStatus.Finished
@@ -163,7 +168,7 @@ public sealed class BookLookupWorkflowTests
         {
             EditableBook = new Book
             {
-                ISBN13 = "978-1 4028-9462-6"
+                ISBN13 = MixedIsbn13
             }
         };
 
@@ -186,7 +191,7 @@ public sealed class BookLookupWorkflowTests
         await harness.Database.Connection.InsertAsync(new Book
         {
             Title = "Normalized Match",
-            ISBN13 = "978-1-4028-9462-6"
+            ISBN13 = HyphenatedIsbn13
         });
 
         var book = await harness.Repository.GetByIsbnAsync("978 1402894626");

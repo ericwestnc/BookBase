@@ -71,6 +71,13 @@ public sealed class BookRepository : IBookRepository
             return null;
         }
 
+        var exactMatch = await _database.Connection.Table<Book>()
+            .FirstOrDefaultAsync(b => b.ISBN10 == normalized || b.ISBN13 == normalized);
+        if (exactMatch is not null)
+        {
+            return exactMatch;
+        }
+
         var books = await _database.Connection.Table<Book>()
             .Where(b => b.ISBN10 != null || b.ISBN13 != null)
             .ToListAsync();
