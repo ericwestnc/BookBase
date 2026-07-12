@@ -7,7 +7,10 @@
         <VerticalStackLayout Padding="16" Spacing="10">
             <Entry Placeholder="ISBN-13" Text="{Binding EditableBook.ISBN13}" />
             <Entry Placeholder="ISBN-10" Text="{Binding EditableBook.ISBN10}" />
-            <Button Text="Lookup ISBN" Command="{Binding LookupByIsbnCommand}" />
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                <Button Grid.Column="0" Text="Lookup ISBN" Command="{Binding LookupByIsbnCommand}" />
+                <Button Grid.Column="1" Text="Scan ISBN" Command="{Binding ScanIsbnCommand}" />
+            </Grid>
             <Entry Placeholder="Title" Text="{Binding EditableBook.Title}" />
             <Entry Placeholder="Author" Text="{Binding EditableBook.Author}" />
             <Entry Placeholder="Publisher" Text="{Binding EditableBook.Publisher}" />

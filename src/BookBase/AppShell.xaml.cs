@@ -9,5 +9,6 @@ public partial class AppShell : Shell
         InitializeComponent();
         Routing.RegisterRoute(nameof(BookDetailsPage), typeof(BookDetailsPage));
         Routing.RegisterRoute(nameof(AddEditBookPage), typeof(AddEditBookPage));
+        Routing.RegisterRoute(nameof(IsbnScannerPage), typeof(IsbnScannerPage));
     }
 }

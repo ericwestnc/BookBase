@@ -18,6 +18,8 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+    <!-- Single version property for both ZXing.Net.Maui packages -->
+    <ZXingNetMauiVersion>0.10.3</ZXingNetMauiVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,5 +37,9 @@
     <PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="ZXing.Net.Maui" Version="$(ZXingNetMauiVersion)" />
+    <PackageReference Include="ZXing.Net.Maui.Controls" Version="$(ZXingNetMauiVersion)" />
+    <PackageReference Include="Xamarin.Google.MLKit.TextRecognition" Version="116.0.1.8"
+                      Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
   </ItemGroup>
 </Project>

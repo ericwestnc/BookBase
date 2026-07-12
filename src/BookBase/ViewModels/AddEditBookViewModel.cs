@@ -21,6 +21,37 @@ public sealed partial class AddEditBookViewModel : BaseViewModel
     [ObservableProperty]
     private Book editableBook;
 
+    /// <summary>
+    /// Called by <see cref="Views.AddEditBookPage"/> when the page receives
+    /// a <c>scannedIsbn</c> Shell query parameter from the scanner page.
+    /// Sets the appropriate ISBN field and triggers an automatic lookup.
+    /// </summary>
+    public async Task ApplyScannedIsbnAsync(string isbn, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(isbn))
+        {
+            return;
+        }
+
+        // Clone the current book so the UI refreshes (Book doesn't implement
+        // INotifyPropertyChanged; only replacing the EditableBook reference triggers
+        // the observable update).
+        var updated = EditableBook.Clone();
+        if (isbn.Length == 13)
+            updated.ISBN13 = isbn;
+        else if (isbn.Length == 10)
+            updated.ISBN10 = isbn;
+        EditableBook = updated;
+
+        await LookupByIsbnAsync(cancellationToken);
+    }
+
+    [RelayCommand]
+    private static async Task ScanIsbnAsync()
+    {
+        await Shell.Current.GoToAsync("IsbnScannerPage");
+    }
+
     [RelayCommand]
     private async Task LookupByIsbnAsync(CancellationToken cancellationToken)
     {
