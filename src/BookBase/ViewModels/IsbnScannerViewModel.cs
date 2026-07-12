@@ -1,4 +1,5 @@
 using BookBase.Interfaces;
+using BookBase.Models;
 using BookBase.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -101,7 +102,17 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
         }
 
         // Check for duplicates in the local library before navigating.
-        var existing = await _bookRepository.GetByIsbnAsync(normalized, cancellationToken);
+        Book? existing;
+        try
+        {
+            existing = await _bookRepository.GetByIsbnAsync(normalized, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[IsbnScannerViewModel] Duplicate check failed: {ex}");
+            // Proceed with navigation; the lookup will handle any issues.
+            existing = null;
+        }
         if (existing is not null)
         {
             IsDetecting = false;
@@ -115,7 +126,9 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
             {
                 try
                 {
-                    // existing.Id is an int, so no URL encoding is required.
+                    // The scanner is always navigated to from a single level above
+                    // (AddEditBookPage or DashboardPage → IsbnScannerPage), so
+                    // "../BookDetailsPage" reliably pops the scanner and pushes details.
                     await Shell.Current.GoToAsync($"../BookDetailsPage?bookId={existing.Id}");
                 }
                 catch (Exception ex)
