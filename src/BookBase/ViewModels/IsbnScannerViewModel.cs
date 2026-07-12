@@ -113,6 +113,7 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
 
             if (viewBook)
             {
+                // existing.Id is an int, so no URL encoding is required.
                 await Shell.Current.GoToAsync($"../BookDetailsPage?bookId={existing.Id}");
             }
             else
@@ -262,9 +263,10 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
                 normalized.Length == 8 && normalized.All(char.IsAsciiDigit),
 
             BarcodeFormat.UpcE =>
-                // UPC-E (8 digits, compressed form of UPC-A) – accept and
-                // let the checksum validator decide.
-                normalized.Length == 8 && normalized.All(char.IsAsciiDigit),
+                // UPC-E is returned by ZXing in its compressed (8-digit) form.
+                // Accept both the 8-digit compressed form and the 12-digit
+                // expanded UPC-A equivalent so either representation is handled.
+                (normalized.Length == 8 || normalized.Length == 12) && normalized.All(char.IsAsciiDigit),
 
             _ => false
         };

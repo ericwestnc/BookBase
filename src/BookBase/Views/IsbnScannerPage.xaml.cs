@@ -39,37 +39,45 @@ public partial class IsbnScannerPage : ContentPage
 
     private async Task RequestCameraPermissionAndStartAsync()
     {
-        var status = await Permissions.CheckStatusAsync<Permissions.Camera>();
-
-        if (status != PermissionStatus.Granted)
+        try
         {
-            status = await Permissions.RequestAsync<Permissions.Camera>();
-        }
+            var status = await Permissions.CheckStatusAsync<Permissions.Camera>();
 
-        if (status == PermissionStatus.Granted)
-        {
-            if (BindingContext is IsbnScannerViewModel vm && vm.IsBarcodeScanMode)
+            if (status != PermissionStatus.Granted)
             {
-                BarcodeReaderView.IsDetecting = true;
+                status = await Permissions.RequestAsync<Permissions.Camera>();
             }
-        }
-        else
-        {
-            // Camera permission denied – show a friendly explanation.
-            bool openSettings = await Shell.Current.DisplayAlert(
-                "Camera Required",
-                "BookBase requires camera access to scan book barcodes and ISBNs. Please grant camera permission in Settings.",
-                "Open Settings",
-                "Cancel");
 
-            if (openSettings)
+            if (status == PermissionStatus.Granted)
             {
-                AppInfo.ShowSettingsUI();
+                if (BindingContext is IsbnScannerViewModel vm && vm.IsBarcodeScanMode)
+                {
+                    BarcodeReaderView.IsDetecting = true;
+                }
             }
             else
             {
-                await Shell.Current.GoToAsync("..");
+                // Camera permission denied – show a friendly explanation.
+                bool openSettings = await Shell.Current.DisplayAlert(
+                    "Camera Required",
+                    "BookBase requires camera access to scan book barcodes and ISBNs. Please grant camera permission in Settings.",
+                    "Open Settings",
+                    "Cancel");
+
+                if (openSettings)
+                {
+                    AppInfo.ShowSettingsUI();
+                }
+                else
+                {
+                    await Shell.Current.GoToAsync("..");
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[IsbnScannerPage] Camera permission request failed: {ex}");
+            await Shell.Current.GoToAsync("..");
         }
     }
 
