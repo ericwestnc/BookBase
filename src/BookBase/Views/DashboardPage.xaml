@@ -6,6 +6,9 @@
     <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
         <ScrollView>
             <VerticalStackLayout Padding="16" Spacing="12">
+                <Button Text="Scan ISBN"
+                        Command="{Binding ScanIsbnCommand}"
+                        HorizontalOptions="Fill" />
                 <Frame CornerRadius="12" Padding="16">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Currently Reading" FontAttributes="Bold" />

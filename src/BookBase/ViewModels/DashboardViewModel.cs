@@ -1,5 +1,6 @@
 using BookBase.Interfaces;
 using BookBase.Models;
+using BookBase.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -23,6 +24,12 @@ public sealed partial class DashboardViewModel : BaseViewModel
 
     public ObservableCollection<Book> NewestBooks { get; } = [];
     public ObservableCollection<Book> RecentlyFinished { get; } = [];
+
+    [RelayCommand]
+    private async Task ScanIsbnAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(IsbnScannerPage));
+    }
 
     [RelayCommand]
     private async Task LoadAsync(CancellationToken cancellationToken)

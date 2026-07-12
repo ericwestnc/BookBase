@@ -28,5 +28,7 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSCameraUsageDescription</key>
+	<string>BookBase requires camera access to scan book barcodes and ISBNs.</string>
 </dict>
 </plist>

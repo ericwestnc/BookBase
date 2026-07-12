@@ -1,4 +1,5 @@
 using BookBase.Interfaces;
+using BookBase.Models;
 using BookBase.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -28,10 +29,14 @@ namespace BookBase.ViewModels;
 public sealed partial class IsbnScannerViewModel : BaseViewModel
 {
     private readonly IIsbnTextRecognitionService _textRecognitionService;
+    private readonly IBookRepository _bookRepository;
 
-    public IsbnScannerViewModel(IIsbnTextRecognitionService textRecognitionService)
+    public IsbnScannerViewModel(
+        IIsbnTextRecognitionService textRecognitionService,
+        IBookRepository bookRepository)
     {
         _textRecognitionService = textRecognitionService;
+        _bookRepository = bookRepository;
         Title = "Scan ISBN";
         StatusMessage = "Point the camera at a book barcode.";
     }
@@ -96,7 +101,55 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
             return;
         }
 
-        // Valid ISBN – stop detection and navigate back.
+        // Check for duplicates in the local library before navigating.
+        Book? existing;
+        try
+        {
+            existing = await _bookRepository.GetByIsbnAsync(normalized, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[IsbnScannerViewModel] Duplicate check failed: {ex}");
+            // Proceed with navigation; the lookup will handle any issues.
+            existing = null;
+        }
+        if (existing is not null)
+        {
+            IsDetecting = false;
+            bool viewBook = await Shell.Current.DisplayAlert(
+                "Already in Library",
+                "This book already exists in your library.",
+                "View Book",
+                "Scan Another");
+
+            if (viewBook)
+            {
+                try
+                {
+                    // The scanner is always navigated to from a single level above
+                    // (AddEditBookPage or DashboardPage → IsbnScannerPage), so
+                    // "../BookDetailsPage" reliably pops the scanner and pushes details.
+                    await Shell.Current.GoToAsync($"../BookDetailsPage?bookId={existing.Id}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[IsbnScannerViewModel] Navigation to BookDetailsPage failed: {ex}");
+                    // Resume scanning so the user is not left in a broken state.
+                    StatusMessage = "Point the camera at a book barcode.";
+                    IsDetecting = true;
+                }
+            }
+            else
+            {
+                // Resume scanning.
+                StatusMessage = "Point the camera at a book barcode.";
+                IsDetecting = true;
+            }
+
+            return;
+        }
+
+        // Valid ISBN, not a duplicate – stop detection and navigate back.
         IsDetecting = false;
         await ConfirmIsbnAsync(normalized, cancellationToken);
     }
@@ -232,10 +285,11 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
                 // EAN-8 is never an ISBN but accept and let checksum decide.
                 normalized.Length == 8 && normalized.All(char.IsAsciiDigit),
 
-            BarcodeFormat.Code128 =>
-                // CODE-128 may encode a raw 10- or 13-digit ISBN string.
-                (normalized.Length == 10 || normalized.Length == 13)
-                    && normalized.All(c => char.IsAsciiDigit(c) || c == 'X'),
+            BarcodeFormat.UpcE =>
+                // UPC-E is returned by ZXing in its compressed (8-digit) form.
+                // Accept both the 8-digit compressed form and the 12-digit
+                // expanded UPC-A equivalent so either representation is handled.
+                (normalized.Length == 8 || normalized.Length == 12) && normalized.All(char.IsAsciiDigit),
 
             _ => false
         };
