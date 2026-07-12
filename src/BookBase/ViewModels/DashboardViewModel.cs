@@ -26,7 +26,7 @@ public sealed partial class DashboardViewModel : BaseViewModel
     public ObservableCollection<Book> RecentlyFinished { get; } = [];
 
     [RelayCommand]
-    private static async Task ScanIsbnAsync()
+    private async Task ScanIsbnAsync()
     {
         await Shell.Current.GoToAsync(nameof(IsbnScannerPage));
     }

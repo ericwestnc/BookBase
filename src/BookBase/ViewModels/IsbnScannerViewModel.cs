@@ -113,8 +113,18 @@ public sealed partial class IsbnScannerViewModel : BaseViewModel
 
             if (viewBook)
             {
-                // existing.Id is an int, so no URL encoding is required.
-                await Shell.Current.GoToAsync($"../BookDetailsPage?bookId={existing.Id}");
+                try
+                {
+                    // existing.Id is an int, so no URL encoding is required.
+                    await Shell.Current.GoToAsync($"../BookDetailsPage?bookId={existing.Id}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[IsbnScannerViewModel] Navigation to BookDetailsPage failed: {ex}");
+                    // Resume scanning so the user is not left in a broken state.
+                    StatusMessage = "Point the camera at a book barcode.";
+                    IsDetecting = true;
+                }
             }
             else
             {
