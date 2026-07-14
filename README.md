@@ -1,4 +1,5 @@
 # BookBase
+NOTE: this is still a WIP 
 
 BookBase is a cross-platform .NET MAUI personal library manager built with MVVM, SQLite, and dependency injection. It runs on Android, iOS, macOS Catalyst, and Windows.
 
